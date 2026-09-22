@@ -2,12 +2,7 @@
 
 namespace Nexus;
 
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider;
-use Nexus\Commands\ClearCacheCommand;
-use Nexus\Repositories\FilesRepository;
-use Illuminate\Foundation\Application;
-use Nexus\Support\Transformers\FileDataTransformer;
 
 /**
  * @author Damian Ułan <damian.ulan@protonmail.com>
