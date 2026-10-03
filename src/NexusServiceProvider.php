@@ -3,6 +3,7 @@
 namespace Nexus;
 
 use Illuminate\Support\ServiceProvider;
+use Nexus\Blueprints\Nav\NavigationBar;
 
 /**
  * @author Damian Ułan <damian.ulan@protonmail.com>
@@ -14,6 +15,10 @@ class NexusServiceProvider extends ServiceProvider
     public function register(): void
     {
         // $this->mergeConfigFrom(__DIR__ . '/../config/nexus.php', 'nexus');
+
+        $this->app->singleton('nexus.sidebar', function (): NavigationBar {
+            return new NavigationBar();
+        });
     }
 
     public function boot(): void
