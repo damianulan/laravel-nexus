@@ -15,6 +15,8 @@ class NavigationItem implements NavigationElement
 
     protected bool $external = false;
 
+    protected bool $disabled = false;
+
     protected int $priority = 0;
 
     public static function make(
@@ -86,6 +88,18 @@ class NavigationItem implements NavigationElement
         return $this->getRoute() === Route::currentRouteName();
     }
 
+    public function isDisabled(): bool
+    {
+        return Route::has($this->getRoute()) === false || $this->disabled;
+    }
+
+    public function disable(): static
+    {
+        $this->disabled = true;
+
+        return $this;
+    }
+
     public function toArray(): array
     {
         return [
@@ -93,6 +107,7 @@ class NavigationItem implements NavigationElement
             'link' => $this->getLink(),
             'icon' => $this->getIcon(),
             'active' => $this->isActive(),
+            'disabled' => $this->isDisabled(),
         ];
     }
 }

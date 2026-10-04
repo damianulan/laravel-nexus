@@ -14,6 +14,8 @@ class NavigationGroup implements NavigationElement
 
     protected int $priority = 0;
 
+    protected bool $disabled = false;
+
     public static function make(string $title): static
     {
         return new static()->setTitle($title);
@@ -62,6 +64,24 @@ class NavigationGroup implements NavigationElement
         return $this->priority;
     }
 
+
+    public function isDisabled(): bool
+    {
+        return $this->disabled;
+    }
+
+    public function disable(): static
+    {
+        $this->disabled = true;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return !empty(array_filter($this->items, fn (NavigationElement $item): bool => $item->isActive()));
+    }
+
     public function toArray(): array
     {
         $items = $this->items;
@@ -72,7 +92,9 @@ class NavigationGroup implements NavigationElement
         return [
             'title' => $this->getTitle(),
             'icon' => $this->getIcon(),
-            'items' => array_map(fn (NavigationElement $item): array => $item->toArray(), $items)
+            'items' => array_map(fn (NavigationElement $item): array => $item->toArray(), $items),
+            'active' => $this->isActive(),
+            'disabled' => $this->isDisabled(),
         ];
     }
 }

@@ -4,6 +4,10 @@ namespace Nexus;
 
 use Illuminate\Support\ServiceProvider;
 use Nexus\Blueprints\Nav\NavigationBar;
+use Nexus\Contracts\Page\PageContract;
+use Nexus\Blueprints\Page\PageBlueprint;
+use Illuminate\Routing\Route;
+use Nexus\Facades\Page\Page;
 
 /**
  * @author Damian Ułan <damian.ulan@protonmail.com>
@@ -16,9 +20,8 @@ class NexusServiceProvider extends ServiceProvider
     {
         // $this->mergeConfigFrom(__DIR__ . '/../config/nexus.php', 'nexus');
 
-        $this->app->singleton('nexus.sidebar', function (): NavigationBar {
-            return new NavigationBar();
-        });
+        $this->app->singleton(PageContract::class, fn (): PageContract => new PageBlueprint());
+        $this->app->singleton('nexus.sidebar', fn (): NavigationBar => new NavigationBar());
     }
 
     public function boot(): void
@@ -35,6 +38,14 @@ class NexusServiceProvider extends ServiceProvider
         //     __DIR__ . '/../config/nexus.php' => config_path('nexus.php'),
         // ], $migrationPublishers), 'nexus');
 
+        Route::macro('header', function (string $header): Route {
+            Page::defineHeader($this->getName(), $header);
+            return $this;
+        });
+        Route::macro('description', function (string $description): Route {
+            Page::defineDescription($this->getName(), $description);
+            return $this;
+        });
     }
 
     private function migrationPublishers(): array
