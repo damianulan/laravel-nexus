@@ -7,6 +7,9 @@ use Nexus\Blueprints\Nav\NavigationBar;
 use Nexus\Contracts\Page\PageContract;
 use Nexus\Blueprints\Page\PageBlueprint;
 use Illuminate\Routing\Route;
+use Nexus\Blueprints\Page\AlertBlueprint;
+use Nexus\Contracts\Page\AlertContract;
+use Nexus\Contracts\Page\SnackbarContract;
 use Nexus\Facades\Page\Page;
 
 /**
@@ -18,10 +21,20 @@ class NexusServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // $this->mergeConfigFrom(__DIR__ . '/../config/nexus.php', 'nexus');
+        $this->mergeConfigFrom(__DIR__ . '/../config/nexus.php', 'nexus');
 
         $this->app->singleton(PageContract::class, fn (): PageContract => new PageBlueprint());
         $this->app->singleton('nexus.sidebar', fn (): NavigationBar => new NavigationBar());
+
+        $this->app->bind(
+            SnackbarContract::class,
+            fn (): SnackbarContract => new AlertBlueprint()->snackbar()
+        );
+
+        $this->app->bind(
+            AlertContract::class,
+            fn (): AlertContract => new AlertBlueprint()->alert()
+        );
     }
 
     public function boot(): void
