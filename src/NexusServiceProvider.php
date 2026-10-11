@@ -12,6 +12,7 @@ use Nexus\Contracts\Auth\AuthService;
 use Nexus\Contracts\Page\AlertContract;
 use Nexus\Contracts\Page\SnackbarContract;
 use Nexus\Facades\Page\Page;
+use Nexus\Providers\NexusAuthProvider;
 
 /**
  * @author Damian Ułan <damian.ulan@protonmail.com>
@@ -23,6 +24,8 @@ class NexusServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/nexus.php', 'nexus');
+
+        $this->app->register(NexusAuthProvider::class);
 
         $this->app->singleton(PageContract::class, fn (): PageContract => new PageBlueprint());
         $this->app->singleton('nexus.sidebar', fn (): NavigationBar => new NavigationBar());

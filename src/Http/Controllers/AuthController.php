@@ -31,16 +31,22 @@ abstract class AuthController extends BaseController
         protected AuthService $service
     ) {}
 
-    abstract public function loginForm(): Response;
+    abstract public function loginForm(): mixed;
 
-    abstract public function forgotPasswordForm(): Response;
+    abstract public function forgotPasswordForm(): mixed;
 
-    abstract public function registerForm(): Response;
+    abstract public function registerForm(): mixed;
 
-    abstract public function confirmPasswordForm(): Response;
+    abstract public function confirmPasswordForm(): mixed;
 
-    public function login(Request $request): Response
+    public function login(Request $request): mixed
     {
+        return redirect()->back()->with('error', 'This is error');
+        dd(Auth::attempt([
+            'email' => 'little.waylon@example.org',
+            'password' => 'test'
+        ]));
+
         $credentials = $request->validate([
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
@@ -61,7 +67,7 @@ abstract class AuthController extends BaseController
         return response()->noContent();
     }
 
-    public function register(Request $request): Response
+    public function register(Request $request): mixed
     {
         $user = $this->newUserModel();
         $attributes = $request->validate([
@@ -87,7 +93,7 @@ abstract class AuthController extends BaseController
         return response()->noContent(HttpResponse::HTTP_CREATED);
     }
 
-    public function logout(Request $request): Response
+    public function logout(Request $request): mixed
     {
         $guard = Auth::guard();
 
@@ -103,7 +109,7 @@ abstract class AuthController extends BaseController
         return response()->noContent();
     }
 
-    public function sendResetLink(Request $request): Response
+    public function sendResetLink(Request $request): mixed
     {
         $credentials = $request->validate([
             'email' => ['required', 'string', 'email'],
@@ -128,7 +134,7 @@ abstract class AuthController extends BaseController
         ]);
     }
 
-    public function resetPassword(Request $request): Response
+    public function resetPassword(Request $request): mixed
     {
         $credentials = $request->validate([
             'token' => ['required', 'string'],
@@ -165,7 +171,7 @@ abstract class AuthController extends BaseController
         return response()->noContent();
     }
 
-    public function confirmPassword(Request $request): Response
+    public function confirmPassword(Request $request): mixed
     {
         $request->validate([
             'password' => ['required', 'string', 'current_password'],
@@ -176,7 +182,7 @@ abstract class AuthController extends BaseController
         return response()->noContent();
     }
 
-    public function updatePassword(Request $request): Response
+    public function updatePassword(Request $request): mixed
     {
         $attributes = $request->validate([
             'current_password' => ['required', 'string', 'current_password'],
