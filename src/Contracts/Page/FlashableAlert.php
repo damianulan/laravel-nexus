@@ -10,6 +10,10 @@ interface FlashableAlert extends Arrayable
 
     public function icon(string $icon): static;
 
+    public function closeable(): static;
+
+    public function noncloseable(): static;
+
     public function success(): static;
 
     public function warning(): static;

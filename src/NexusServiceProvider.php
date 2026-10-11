@@ -8,6 +8,7 @@ use Nexus\Contracts\Page\PageContract;
 use Nexus\Blueprints\Page\PageBlueprint;
 use Illuminate\Routing\Route;
 use Nexus\Blueprints\Page\AlertBlueprint;
+use Nexus\Contracts\Auth\AuthService;
 use Nexus\Contracts\Page\AlertContract;
 use Nexus\Contracts\Page\SnackbarContract;
 use Nexus\Facades\Page\Page;
@@ -35,11 +36,24 @@ class NexusServiceProvider extends ServiceProvider
             AlertContract::class,
             fn (): AlertContract => new AlertBlueprint()->alert()
         );
+
+        $this->app->bind(
+            AuthService::class,
+            config('nexus.auth.strategy')
+        );
     }
 
     public function boot(): void
     {
         $migrationPublishers = $this->migrationPublishers();
+
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'nexus');
+
+        // $this->publishesMigrations([
+        //     __DIR__ . '/../database/migrations' => database_path('migrations'),
+        // ]);
 
         // $this->publishes([
         //     __DIR__ . '/../config/nexus.php' => config_path('nexus.php'),

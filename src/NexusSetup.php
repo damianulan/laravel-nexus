@@ -2,10 +2,10 @@
 
 namespace Nexus;
 
-use App\Http\Middleware\TestMiddleware;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Session\Middleware\StartSession;
+use Nexus\Http\Middleware\Auth\AuthenticatedMiddleware;
 
 final class NexusSetup
 {
@@ -14,6 +14,10 @@ final class NexusSetup
         $middleware->web(prepend: [
             StartSession::class,
             EncryptCookies::class,
+        ]);
+
+        $middleware->auth(prepend: [
+            AuthenticatedMiddleware::class
         ]);
     }
 }

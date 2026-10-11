@@ -19,12 +19,6 @@ abstract class FlashableFacade extends Facade
 
     public static function getAll(): array
     {
-        $type = static::getType()->value;
-        $messages = Session::get($type, []);
-        if (!empty($messages)) {
-            Session::forget($type);
-        }
-
-        return $messages;
+        return Session::pull(static::getType()->value, []);
     }
 }

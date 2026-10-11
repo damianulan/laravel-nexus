@@ -13,9 +13,11 @@ class AlertBlueprint implements AlertContract, SnackbarContract
 
     protected string $text;
 
-    protected string $color;
+    protected string $color = 'primary';
 
     protected ?string $icon = null;
+
+    protected bool $closeable = true;
 
     private FlashableType $type; // alert / snackbar
 
@@ -51,6 +53,18 @@ class AlertBlueprint implements AlertContract, SnackbarContract
     public function icon(string $icon): static
     {
         $this->icon = $icon;
+        return $this;
+    }
+
+    public function closeable(): static
+    {
+        $this->closeable = true;
+        return $this;
+    }
+
+    public function noncloseable(): static
+    {
+        $this->closeable = false;
         return $this;
     }
 
@@ -97,6 +111,7 @@ class AlertBlueprint implements AlertContract, SnackbarContract
             'text' => $this->text,
             'color' => $this->color,
             'icon' => $this->icon,
+            'closeable' => $this->closeable,
         ];
     }
 
