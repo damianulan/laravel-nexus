@@ -8,5 +8,7 @@ return [
             'identifier' => 'email',
             'secret' => 'password',
         ],
+
+        'controller' => App\Http\Controllers\AuthController::class
     ]
 ];

@@ -16,8 +16,8 @@ final class NexusSetup
             EncryptCookies::class,
         ]);
 
-        $middleware->auth(prepend: [
-            AuthenticatedMiddleware::class
+        $middleware->alias([
+            'nexus.auth' => AuthenticatedMiddleware::class
         ]);
     }
 }

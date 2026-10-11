@@ -18,7 +18,7 @@ Route::middleware('web')->group(function (): void {
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:6,1')->name('password.store');
     });
 
-    Route::middleware('auth')->group(function (): void {
+    Route::middleware('nexus.auth')->group(function (): void {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
         Route::get('/confirm-password', [AuthController::class, 'confirmPasswordForm'])->name('password.confirm');
