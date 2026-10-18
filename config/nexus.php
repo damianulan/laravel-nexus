@@ -2,13 +2,29 @@
 
 return [
     'auth' => [
-        'strategy' => Nexus\Services\Auth\LocalAuthService::class,
+        'strategy' => Nexus\Auth\Services\AuthService::class,
 
-        'fields' => [
-            'identifier' => 'email',
-            'secret' => 'password',
+        'controller' => App\Http\Controllers\AuthController::class,
+
+        'rvc' => [
+            'url' => env('AUTH_API_URL'),
+            'token' => env('AUTH_API_TOKEN'),
         ],
 
-        'controller' => App\Http\Controllers\AuthController::class
+        'support_identifier' => env('AUTH_SUPPORT_IDENTIFIER', 'email'),
+        'secret_attribute' => env('AUTH_SECRET_ATTRIBUTE', 'password'),
+        'remember_me' => true,
+        'login_attributes' => [
+            'email',
+            'username',
+            'token',
+            'remember',
+            'password',
+        ],
+        'rules' => [
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string', 'min:6'],
+            'remember' => ['sometimes', 'boolean'],
+        ],
     ]
 ];

@@ -7,12 +7,12 @@ use Nexus\Blueprints\Nav\NavigationBar;
 use Nexus\Contracts\Page\PageContract;
 use Nexus\Blueprints\Page\PageBlueprint;
 use Illuminate\Routing\Route;
+use Nexus\Auth\Contracts\AuthStrategy;
 use Nexus\Blueprints\Page\AlertBlueprint;
-use Nexus\Contracts\Auth\AuthService;
 use Nexus\Contracts\Page\AlertContract;
 use Nexus\Contracts\Page\SnackbarContract;
 use Nexus\Facades\Page\Page;
-use Nexus\Providers\NexusAuthProvider;
+use Nexus\Auth\Providers\NexusAuthProvider;
 
 /**
  * @author Damian Ułan <damian.ulan@protonmail.com>
@@ -38,11 +38,6 @@ class NexusServiceProvider extends ServiceProvider
         $this->app->bind(
             AlertContract::class,
             fn (): AlertContract => new AlertBlueprint()->alert()
-        );
-
-        $this->app->bind(
-            AuthService::class,
-            config('nexus.auth.strategy')
         );
     }
 

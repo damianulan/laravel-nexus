@@ -23,12 +23,16 @@ use Nexus\Contracts\Auth\AuthService;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 use Illuminate\Contracts\Auth\Factory as AuthContract;
+use Illuminate\Support\Facades\Log;
+use Nexus\Auth\Contracts\AuthStrategy;
 
 abstract class AuthController extends BaseController
 {
+    protected string $afterLoginRoute = 'home';
+
     public function __construct(
         protected AuthContract $auth,
-        protected AuthService $service
+        protected AuthStrategy $service
     ) {}
 
     abstract public function loginForm(): mixed;
@@ -41,30 +45,10 @@ abstract class AuthController extends BaseController
 
     public function login(Request $request): mixed
     {
-        return redirect()->back()->with('error', 'This is error');
-        dd(Auth::attempt([
-            'email' => 'little.waylon@example.org',
-            'password' => 'test'
-        ]));
-
-        $credentials = $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-            'remember' => ['sometimes', 'boolean'],
-        ]);
-
-        $remember = (bool) ($credentials['remember'] ?? false);
-        unset($credentials['remember']);
-
-        if (! Auth::attempt($credentials, $remember)) {
-            throw ValidationException::withMessages([
-                'email' => [__('auth.failed')],
-            ]);
+        if($this->service->login($request->all())) {
+            return redirect()->route($this->afterLoginRoute);
         }
-
-        $request->session()->regenerate();
-
-        return response()->noContent();
+        return redirect()->back();
     }
 
     public function register(Request $request): mixed
@@ -95,16 +79,7 @@ abstract class AuthController extends BaseController
 
     public function logout(Request $request): mixed
     {
-        $guard = Auth::guard();
-
-        if (! $guard instanceof StatefulGuard) {
-            throw new RuntimeException('The default authentication guard must be stateful.');
-        }
-
-        $guard->logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $this->service->logout();
 
         return response()->noContent();
     }
@@ -123,7 +98,7 @@ abstract class AuthController extends BaseController
             ]);
         }
 
-        return response()->noContent();
+        return redirect()->to('/');
     }
 
     public function resetPasswordForm(Request $request, string $token): JsonResponse
