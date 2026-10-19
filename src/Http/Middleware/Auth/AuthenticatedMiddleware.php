@@ -3,14 +3,19 @@
 namespace Nexus\Http\Middleware\Auth;
 
 use Illuminate\Auth\Middleware\Authenticate;
-use Nexus\Auth\Contracts\AuthContract;
+use Nexus\Auth\Contracts\AuthStrategy;
+use Illuminate\Contracts\Auth\Factory as Auth;
+use Closure;
 
 class AuthenticatedMiddleware extends Authenticate
 {
     public function __construct(
-        protected AuthContract $service
+        Auth $auth,
+        protected AuthStrategy $service,
     )
-    {}
+    {
+        $this->auth = $auth;
+    }
 
     /**
      * Handle an incoming request.
