@@ -99,6 +99,10 @@ class RvcUserProvider implements UserProvider
 
         with($query, $this->queryCallback);
 
+        if(method_exists($query, 'authorizable')) {
+            $query->authorizable();
+        }
+
         return $query;
     }
 

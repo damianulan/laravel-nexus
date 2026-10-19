@@ -81,7 +81,7 @@ abstract class AuthController extends BaseController
     {
         $this->service->logout();
 
-        return response()->noContent();
+        return redirect()->to('/');
     }
 
     public function sendResetLink(Request $request): mixed

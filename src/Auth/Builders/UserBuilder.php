@@ -14,4 +14,10 @@ use Nexus\Auth\AuthorizableModel;
  */
 class UserBuilder extends Builder
 {
+    public function authorizable(): static
+    {
+        $this->whereNull('suspended_at');
+
+        return $this;
+    }
 }
