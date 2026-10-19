@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
+use Nexus\Auth\Builders\UserBuilder;
+use Nexus\Concerns\Eloquent\HasUuid;
 
 class AuthorizableModel extends Model implements
     AuthenticatableContract,
@@ -19,6 +21,9 @@ class AuthorizableModel extends Model implements
     CanResetPasswordContract
 {
     use Authenticatable, Authorizable, CanResetPassword, MustVerifyEmail;
+    use HasUuid;
     use SoftDeletes;
     use Notifiable;
+
+    protected static string $builder = UserBuilder::class;
 }

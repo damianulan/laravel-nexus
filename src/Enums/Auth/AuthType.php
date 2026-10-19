@@ -11,4 +11,6 @@ enum AuthType: string
     case OAUTH2 = 'oauth2';
 
     case SSO = 'sso';
+
+    case RVC = 'rvc';
 }

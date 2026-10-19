@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Contracts\Support\Arrayable;
 use Nexus\Auth\Clients\RvcHttpClient;
 use Nexus\Auth\Support\AuthConfig;
+use Nexus\Enums\Auth\AuthType;
 
 class RvcUserProvider implements UserProvider
 {
@@ -37,22 +38,47 @@ class RvcUserProvider implements UserProvider
             return;
         }
 
-        return $this->retrieveFromClient($credentials);
+        return $this->retrieveFromClient($credentials) ?? $this->retrieveFromEloquent($credentials);
     }
 
     protected function retrieveFromClient(array $credentials): ?UserContract
     {
         $rawUser = $this->client->getAuthenticatableUser($credentials);
         $supportIdentifier = AuthConfig::getSupportIdentifier();
+        $rawUser['auth'] = AuthType::RVC;
 
-        return $this->newModelQuery()->firstOrCreate([
+        return $this->newModelQuery()->updateOrCreate([
             $supportIdentifier => $rawUser[$supportIdentifier],
         ], $rawUser);
     }
 
+    protected function retrieveFromEloquent(array $credentials): ?UserContract
+    {
+        $query = $this->newModelQuery();
+
+        foreach ($credentials as $key => $value) {
+            if (is_array($value) || $value instanceof Arrayable) {
+                $query->whereIn($key, $value);
+            } elseif ($value instanceof Closure) {
+                $value($query);
+            } else {
+                $query->where($key, $value);
+            }
+        }
+
+        $user = $query->first();
+
+        if ($user) {
+            $user->setAttribute('auth', AuthType::LOCAL);
+            $user->updateQuietly();
+        }
+
+        return $user;
+    }
+
     public function validateCredentials(UserContract $user, #[\SensitiveParameter] array $credentials)
     {
-        $authenticated = $this->retrieveFromClient($credentials);
+        $authenticated = $this->retrieveFromClient($credentials) ?? $this->retrieveFromEloquent($credentials);
 
         return $authenticated->getAuthIdentifier() === $user->getAuthIdentifier();
     }
