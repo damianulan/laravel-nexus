@@ -26,5 +26,9 @@ return [
             'password' => ['required', 'string', 'min:6'],
             'remember' => ['sometimes', 'boolean'],
         ],
+    ],
+
+    'inertia' => [
+        'middleware' => App\Http\Middleware\HandleInertiaRequests::class
     ]
 ];
