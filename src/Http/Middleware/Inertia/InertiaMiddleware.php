@@ -47,7 +47,7 @@ class InertiaMiddleware extends Middleware
 
         return [
             ...parent::share($request),
-            'theme' => $this->getTheme(),
+            'theme' => $this->getTheme($request),
             'sidebar' => Sidebar::toArray(),
             'page' => Page::toArray(),
             'snackbars' => fn (): array => Snackbar::getAll(),
@@ -143,7 +143,7 @@ class InertiaMiddleware extends Middleware
         return array_values(array_unique($groups));
     }
 
-    protected function getTheme(): array
+    protected function getTheme(Request $request): array
     {
         $theme = config('theme.' . $this->getThemeName());
         return [
