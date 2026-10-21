@@ -26,6 +26,7 @@ class NexusServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/nexus.php', 'nexus');
         $this->mergeConfigFrom(__DIR__ . '/../config/theme.php', 'theme');
+        $this->mergeConfigFrom(__DIR__ . '/../config/datatables.php', 'datatables');
 
         $this->app->register(NexusAuthProvider::class);
 

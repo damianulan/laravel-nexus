@@ -18,6 +18,12 @@ abstract class DataTableBlueprint implements TableContract
 
     private DataTablePaginator $paginator;
 
+    /**
+     * Per page available options.
+     * @var array<int>
+     */
+    private array $pagination;
+
     /** @return class-string<JsonResource> */
     abstract protected function getResourceClass(): string;
 
@@ -52,6 +58,7 @@ abstract class DataTableBlueprint implements TableContract
         return [
             'columns' => $this->columns->toArray(),
             'paginator' => $this->paginator->toArray(),
+            'pagination' => $this->pagination,
         ];
     }
 }
