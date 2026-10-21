@@ -14,7 +14,7 @@ class RvcHttpClient
             ->acceptJson()
             ->connectTimeout(3)
             ->timeout(10)
-            ->post('/api/auth', $credentials);
+            ->post(config('nexus.auth.rvc.path'), $credentials);
     }
 
     public function getAuthenticatableUser(array $credentials): array

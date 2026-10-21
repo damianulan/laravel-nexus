@@ -9,6 +9,7 @@ return [
         'rvc' => [
             'url' => env('AUTH_API_URL'),
             'token' => env('AUTH_API_TOKEN'),
+            'path' => '/api/auth',
         ],
 
         'support_identifier' => env('AUTH_SUPPORT_IDENTIFIER', 'email'),

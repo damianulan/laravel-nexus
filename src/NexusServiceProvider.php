@@ -13,6 +13,7 @@ use Nexus\Contracts\Page\AlertContract;
 use Nexus\Contracts\Page\SnackbarContract;
 use Nexus\Facades\Page\Page;
 use Nexus\Auth\Providers\NexusAuthProvider;
+use Nexus\Providers\MonolithServiceProvider;
 
 /**
  * @author Damian Ułan <damian.ulan@protonmail.com>
@@ -40,6 +41,8 @@ class NexusServiceProvider extends ServiceProvider
             AlertContract::class,
             fn (): AlertContract => new AlertBlueprint()->alert()
         );
+
+        $this->app->register(MonolithServiceProvider::class);
     }
 
     public function boot(): void
