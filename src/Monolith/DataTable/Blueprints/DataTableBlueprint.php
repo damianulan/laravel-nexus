@@ -26,8 +26,10 @@ abstract class DataTableBlueprint implements TableContract
     /** @return array<DataColumn> */
     abstract protected function columns(): array;
 
-    public function __construct() {
-        $request = FacadesRequest::capture();
+    public function __construct(?Request $request = null) {
+        if ($request === null) {
+            $request = FacadesRequest::capture();
+        }
         $this->paginator = DataTablePaginator::from(
             $this->source(),
             $this->getResourceClass(),
