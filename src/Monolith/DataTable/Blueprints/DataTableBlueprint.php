@@ -46,6 +46,7 @@ abstract class DataTableBlueprint implements TableContract
             $request->query('sortDirection', 'ASC'),
         );
         $this->columns = collect($this->columns());
+        $this->pagination = config('datatables.pagination', []);
     }
 
     public function getPaginator(): DataTablePaginator
