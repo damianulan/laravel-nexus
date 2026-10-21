@@ -10,10 +10,11 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Nexus\Monolith\DataTable\Contracts\ColumnContract;
 
 abstract class DataTableBlueprint implements TableContract
 {
-    /** @var Collection<DataColumn> */
+    /** @var Collection<ColumnContract> */
     private Collection $columns;
 
     private DataTablePaginator $paginator;
@@ -45,7 +46,8 @@ abstract class DataTableBlueprint implements TableContract
             $request->query('sortBy'),
             $request->query('sortDirection', 'ASC'),
         );
-        $this->columns = collect($this->columns())->mapWithKeys(fn (DataColumn $item): array => [$item->getName() => $item]);
+        $this->columns = collect($this->columns())
+            ->mapWithKeys(fn (ColumnContract $item): array => [$item->getName() => $item]);
         $this->pagination = config('datatables.pagination', []);
     }
 

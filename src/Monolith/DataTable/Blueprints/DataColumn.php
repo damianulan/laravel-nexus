@@ -49,13 +49,6 @@ class DataColumn implements ColumnContract
         return $this;
     }
 
-    public function selectable(): static
-    {
-        $this->type = ColumnType::Selectable;
-
-        return $this;
-    }
-
     public function toArray(): array
     {
         return [
