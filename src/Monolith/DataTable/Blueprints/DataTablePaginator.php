@@ -2,6 +2,7 @@
 
 namespace Nexus\Monolith\DataTable\Blueprints;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -16,7 +17,7 @@ class DataTablePaginator extends LengthAwarePaginator
     protected ?string $sortDirection;
 
     /**
-     * @param class-string<JsonResource> $resourceClass
+     * @param class-string<JsonResource|Arrayable> $resourceClass
      */
     public function __construct(
         Collection $items,
@@ -113,10 +114,29 @@ class DataTablePaginator extends LengthAwarePaginator
 
     public function toArray(): array
     {
+        $items = $this->items->map(function ($item): array {
+            if ($item instanceof JsonResource) {
+                return $item->resolve();
+            }
+            if ($item instanceof Arrayable) {
+                return $item->toArray();
+            }
+            return (array) $item;
+        });
         return [
-            ...parent::toArray(),
-            'sortBy' => $this->sortBy,
-            'sortDirection' => $this->sortDirection,
+            'current_page' => $this->currentPage(),
+            'data' => $items->toArray(),
+            'first_page_url' => $this->url(1),
+            'from' => $this->firstItem(),
+            'last_page' => $this->lastPage(),
+            'last_page_url' => $this->url($this->lastPage()),
+            'links' => $this->linkCollection()->toArray(),
+            'next_page_url' => $this->nextPageUrl(),
+            'path' => $this->path(),
+            'per_page' => $this->perPage(),
+            'prev_page_url' => $this->previousPageUrl(),
+            'to' => $this->lastItem(),
+            'total' => $this->total(),
         ];
     }
 }

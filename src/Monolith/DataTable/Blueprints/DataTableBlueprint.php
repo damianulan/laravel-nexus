@@ -45,7 +45,7 @@ abstract class DataTableBlueprint implements TableContract
             $request->query('sortBy'),
             $request->query('sortDirection', 'ASC'),
         );
-        $this->columns = collect($this->columns());
+        $this->columns = collect($this->columns())->mapWithKeys(fn (DataColumn $item): array => [$item->getName() => $item]);
         $this->pagination = config('datatables.pagination', []);
     }
 
@@ -57,7 +57,7 @@ abstract class DataTableBlueprint implements TableContract
     public function toArray(): array
     {
         return [
-            'columns' => $this->columns->toArray(),
+            'columns' => $this->columns->values()->toArray(),
             'paginator' => $this->paginator->toArray(),
             'pagination' => $this->pagination,
         ];
