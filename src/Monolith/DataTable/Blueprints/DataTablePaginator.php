@@ -11,6 +11,10 @@ use Illuminate\Support\Collection;
 
 class DataTablePaginator extends LengthAwarePaginator
 {
+    protected ?string $sortBy;
+
+    protected ?string $sortDirection;
+
     /**
      * @param class-string<JsonResource> $resourceClass
      */
@@ -21,7 +25,8 @@ class DataTablePaginator extends LengthAwarePaginator
         ?int $currentPage,
         string $resourceClass,
         array $options = [],
-
+        ?string $sortBy = null,
+        ?string $sortDirection = null,
     ) {
         parent::__construct(
             $this->mapCollection($items, $resourceClass),
@@ -30,6 +35,9 @@ class DataTablePaginator extends LengthAwarePaginator
             $currentPage,
             $options,
         );
+
+        $this->sortBy = $sortBy;
+        $this->sortDirection = $sortDirection;
     }
 
     /**
@@ -57,6 +65,8 @@ class DataTablePaginator extends LengthAwarePaginator
                     'path' => static::resolveCurrentPath(),
                     'pageName' => $pageName,
                 ],
+                sortBy: $sortBy,
+                sortDirection: $sortDirection,
             );
         }
 
@@ -73,6 +83,8 @@ class DataTablePaginator extends LengthAwarePaginator
             currentPage: $paginator->currentPage(),
             resourceClass: $resourceClass,
             options: $paginator->getOptions(),
+            sortBy: $sortBy,
+            sortDirection: $sortDirection,
         );
     }
 
