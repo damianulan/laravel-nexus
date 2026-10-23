@@ -1,64 +1,42 @@
 <?php
 
 return [
-
-    'oceanside' => [
-        'light' => [
-            'background' => '#faf9e8',
-            'surface' => '#f9f8f0',
-            'primary' => '#4E635E',
-            'secondary' => '#A6B49E',
-            'accent' => '#818C78',
-            'error' => '#DC2626',
-            'info' => '#0284C7',
-            'success' => '#16A34A',
-            'warning' => '#D97706',
-        ],
-        'dark' => [
-            'background' => '#242B28',
-            'surface' => '#242B28',
-
-            'primary' => '#9BAFA9',
-            'secondary' => '#7F9278',
-            'accent' => '#A3AD98',
-
-            'error' => '#F87171',
-            'info' => '#38BDF8',
-            'success' => '#4ADE80',
-            'warning' => '#FBBF24',
-        ],
-    ],
-
     'inkwell' => [
         'light' => [
-            'background' => '#DCD7C9',
-            'surface' => '#DCD7C9',
-            'surface-variant' => '#2C3639',
-            'primary' => '#3F4E4F',
-            'secondary' => '#2C3639',
-            'accent' => '#A27B5B',
-            'brand' => '#A27B5B',
+            'background' => '#EEE9DF',
+            'surface' => '#EEE9DF',
 
-            'error' => '#DC2626',
-            'info' => '#0284C7',
-            'success' => '#16A34A',
-            'warning' => '#D97706',
+            'primary' => '#1B2632',
+            'secondary' => '#2C4D43',
+            'accent' => '#A35139',
+            'brand' => '#FFB162',
+            'topbar' => '#2C3B4D',
+            'heading' => '#1B2632',
+
+            'tangerine' => '#FF4F00',
+
+            'error' => '#ED1B24',
+            'info' => '#318CE7',
+            'success' => '#32CD32',
+            'warning' => '#FF8000',
         ],
         'dark' => [
-            'background' => '#2C3639',
-            'surface' => '#2C3639',
-            'surface-variant' => '#DCD7C9',
+            'background' => '#1B2632',
+            'surface' => '#2C3B4D',
 
-            'primary' => '#DCD7C9',
-            'secondary' => '#7F9278',
-            'accent' => '#A27B5B',
-            'brand' => '#FBBF24',
+            'primary' => '#364c64',
+            'secondary' => '#2C4D43',
+            'accent' => '#FFB162',
+            'brand' => '#FFB162',
+            'topbar' => '#1B2632',
+            'heading' => '#FFB162',
 
-            'error' => '#F87171',
-            'info' => '#38BDF8',
-            'success' => '#4ADE80',
-            'warning' => '#FBBF24',
+            'tangerine' => '#FF4F00',
+
+            'error' => '#FF0800',
+            'info' => '#1F75FE',
+            'success' => '#39FF14',
+            'warning' => '#FF4F00',
         ],
     ],
-
 ];

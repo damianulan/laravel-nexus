@@ -2,9 +2,10 @@
 
 return [
     'pagination' => [
-        15,
+        20,
         50,
         100,
         200
     ],
+    'default_per_page' => 20,
 ];

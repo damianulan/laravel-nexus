@@ -46,7 +46,7 @@ abstract class DataTableBlueprint implements TableContract
         $this->paginator = DataTablePaginator::from(
             $this->source(),
             $this->getResourceClass(),
-            $request->integer('perPage', 15),
+            $request->integer('perPage', config('datatables.default_per_page')),
             'page',
             $request->integer('page', 1),
             $request->string('sortBy')->toString() ?: null,

@@ -8,7 +8,7 @@ interface FlashableAlert extends Arrayable
 {
     public function text(string $text): static;
 
-    public function icon(string $icon): static;
+    public function icon(?string $icon): static;
 
     public function closeable(): static;
 

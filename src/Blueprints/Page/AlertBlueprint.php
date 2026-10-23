@@ -50,7 +50,7 @@ class AlertBlueprint implements AlertContract, SnackbarContract
         return $this;
     }
 
-    public function icon(string $icon): static
+    public function icon(?string $icon): static
     {
         $this->icon = $icon;
         return $this;

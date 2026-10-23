@@ -16,7 +16,6 @@ class Alert extends FlashableFacade
 
     public static function getAll(): array
     {
-        //dd(session()->get('error'));
         return Session::pull(static::getType()->value, []);
     }
 }
