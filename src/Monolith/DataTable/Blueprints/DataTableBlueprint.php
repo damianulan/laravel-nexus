@@ -85,6 +85,7 @@ abstract class DataTableBlueprint implements TableContract
             'columns' => $this->columns->values()->toArray(),
             'paginator' => $paginator,
             'pagination' => $this->pagination,
+            'filters' => $this->getFilters()->toArray(),
         ];
     }
 
