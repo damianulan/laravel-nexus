@@ -47,7 +47,7 @@ class InertiaMiddleware extends Middleware
 
         return [
             ...parent::share($request),
-            'theme' => $this->getTheme($request),
+            'theme' => $this->resolveTheme($request),
             'sidebar' => Sidebar::toArray(),
             'page' => Page::toArray(),
             'snackbars' => fn (): array => Snackbar::getAll(),
@@ -143,9 +143,9 @@ class InertiaMiddleware extends Middleware
         return array_values(array_unique($groups));
     }
 
-    protected function getTheme(Request $request): array
+    protected function resolveTheme(Request $request): array
     {
-        $theme = config('theme.' . $this->getThemeName());
+        $theme = $this->getTheme();
         return [
             ...(is_array($theme) ? $theme : []),
             'variant' => ResolveThemeVariant::fromRequest($request)->value,
@@ -153,8 +153,8 @@ class InertiaMiddleware extends Middleware
         ];
     }
 
-    protected function getThemeName(): string
+    protected function getTheme(): array
     {
-        return 'inkwell';
+        return config('theme.inkwell');
     }
 }

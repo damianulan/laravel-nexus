@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Nexus\Monolith\DataTable\Blueprints;
 
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
@@ -14,6 +12,9 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Nexus\Monolith\DataTable\Contracts\ColumnContract;
 use Nexus\Monolith\DataTable\Contracts\TableContract;
+use Nexus\Monolith\Filtering\Blueprints\FilterBag;
+use Nexus\Monolith\Filtering\Facades\Filters;
+use UnexpectedValueException;
 
 abstract class DataTableBlueprint implements TableContract
 {
@@ -31,8 +32,8 @@ abstract class DataTableBlueprint implements TableContract
     /** @return class-string<JsonResource> */
     abstract protected function getResourceClass(): string;
 
-    /** @return Collection<covariant int|string, mixed>|EloquentBuilder<covariant Model>|QueryBuilder */
-    abstract protected function source(): Collection | EloquentBuilder | QueryBuilder;
+    /** @return Collection<covariant int|string, mixed>|Builder */
+    abstract protected function source(): Collection | Builder;
 
     /** @return list<ColumnContract> */
     abstract protected function columns(): array;
@@ -40,11 +41,13 @@ abstract class DataTableBlueprint implements TableContract
     public function __construct(?Request $request = null)
     {
         if ($request === null) {
-            $request = FacadesRequest::capture();
+            $request = FacadesRequest::instance();
         }
 
+        $source = $this->getSourceWithFilters();
+
         $this->paginator = DataTablePaginator::from(
-            $this->source(),
+            $source,
             $this->getResourceClass(),
             $request->integer('perPage', config('datatables.default_per_page')),
             'page',
@@ -63,6 +66,11 @@ abstract class DataTableBlueprint implements TableContract
     public function getPaginator(): DataTablePaginator
     {
         return $this->paginator;
+    }
+
+    protected function getFilters(): FilterBag
+    {
+        return Filters::with([]);
     }
 
     public function toArray(): array
@@ -97,5 +105,21 @@ abstract class DataTableBlueprint implements TableContract
         }
 
         return $resourceWithActions;
+    }
+
+    private function getSourceWithFilters(): Collection | Builder
+    {
+        return $this->getFilters()->apply($this->source());
+    }
+
+    protected function label(string $key): string
+    {
+        $label = __($key);
+
+        if (! is_string($label)) {
+            throw new UnexpectedValueException("The translation [{$key}] must be a string.");
+        }
+
+        return $label;
     }
 }

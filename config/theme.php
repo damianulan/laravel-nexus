@@ -24,8 +24,8 @@ return [
             'background' => '#1B2632',
             'surface' => '#2C3B4D',
 
-            'primary' => '#364c64',
-            'secondary' => '#2C4D43',
+            'primary' => '#6280a0',
+            'secondary' => '#5b9e89',
             'accent' => '#FFB162',
             'brand' => '#FFB162',
             'topbar' => '#1B2632',
