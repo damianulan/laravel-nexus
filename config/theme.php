@@ -7,11 +7,11 @@ return [
             'surface' => '#EEE9DF',
 
             'primary' => '#1B2632',
-            'secondary' => '#2C4D43',
-            'accent' => '#A35139',
-            'brand' => '#FFB162',
-            'topbar' => '#2C3B4D',
-            'heading' => '#1B2632',
+            'secondary' => '#233d35',
+            'accent' => '#ff8b16',
+            'brand' => '#ff8b16',
+            'topbar' => ['#1B2632', '#2C3B4D', '#233d35'],
+            'heading' => '#ff8b16',
 
             'tangerine' => '#FF4F00',
 
@@ -28,7 +28,7 @@ return [
             'secondary' => '#5b9e89',
             'accent' => '#FFB162',
             'brand' => '#FFB162',
-            'topbar' => '#1B2632',
+            'topbar' => ['#1B2632', '#2C3B4D', '#233d35'],
             'heading' => '#FFB162',
 
             'tangerine' => '#FF4F00',
