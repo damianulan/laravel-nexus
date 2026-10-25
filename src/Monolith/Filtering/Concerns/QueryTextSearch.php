@@ -13,13 +13,13 @@ trait QueryTextSearch
      */
     protected function searchText(
         Builder $query,
-        string $text,
+        ?string $text,
         array $fields,
         bool $leftSearch = true,
         bool $rightSearch = true
         ): void
     {
-        if ($fields === []) {
+        if ($fields === [] || empty($text)) {
             return;
         }
 
@@ -43,7 +43,7 @@ trait QueryTextSearch
         }
     }
 
-    protected function nameSearch(Builder $query, string $text, array $fields): void
+    protected function nameSearch(Builder $query, ?string $text, array $fields): void
     {
         $this->searchText($query, $text, $fields, false, true);
     }

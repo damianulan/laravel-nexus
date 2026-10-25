@@ -48,8 +48,6 @@ class NexusServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $migrationPublishers = $this->migrationPublishers();
-
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'nexus');
