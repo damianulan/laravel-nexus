@@ -38,4 +38,9 @@ class AuthorizableModel extends Model implements
     use Notifiable;
 
     protected static string $builder = UserBuilder::class;
+
+    public function syncable(): array
+    {
+        return [];
+    }
 }

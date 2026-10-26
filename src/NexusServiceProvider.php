@@ -30,8 +30,8 @@ class NexusServiceProvider extends ServiceProvider
 
         $this->app->register(NexusAuthProvider::class);
 
-        $this->app->singleton(PageContract::class, fn (): PageContract => new PageBlueprint());
-        $this->app->singleton('nexus.sidebar', fn (): NavigationBar => new NavigationBar());
+        $this->app->singleton(PageContract::class, fn (): PageContract => new PageBlueprint);
+        $this->app->singleton('nexus.sidebar', fn (): NavigationBar => new NavigationBar);
 
         $this->app->bind(
             SnackbarContract::class,
@@ -48,19 +48,17 @@ class NexusServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        $migrationPublishers = $this->migrationPublishers();
 
-        $this->loadTranslationsFrom(__DIR__.'/../lang', 'nexus');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
-        // $this->publishesMigrations([
-        //     __DIR__ . '/../database/migrations' => database_path('migrations'),
-        // ]);
+        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'nexus');
 
         // $this->publishes([
         //     __DIR__ . '/../config/nexus.php' => config_path('nexus.php'),
         // ], 'nexus-config');
 
-        // $this->publishes($migrationPublishers, 'nexus-migrations');
+        $this->publishesMigrations($migrationPublishers, 'nexus-migrations');
 
         // $this->publishes(array_merge([
         //     __DIR__ . '/../config/nexus.php' => config_path('nexus.php'),
@@ -76,10 +74,25 @@ class NexusServiceProvider extends ServiceProvider
         });
     }
 
+    /** @return array<string, string> */
     private function migrationPublishers(): array
     {
-        return [
-            __DIR__ . '/../database/migrations/create_modules_table.php.stub' => database_path('migrations/' . date('Y_m_d_His') . '_create_modules_table.php'),
+        $timestamp = now()->startOfSecond();
+        $migrations = [
+            'create_settings_table.php',
+            'create_preferences_table.php',
         ];
+
+        $publishers = [];
+
+        foreach ($migrations as $offset => $migration) {
+            $publishers[__DIR__ . "/../stubs/{$migration}.stub"] = database_path(sprintf(
+                'migrations/%s_%s',
+                $timestamp->copy()->addSeconds($offset)->format('Y_m_d_His'),
+                $migration,
+            ));
+        }
+
+        return $publishers;
     }
 }

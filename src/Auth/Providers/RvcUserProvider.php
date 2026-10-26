@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Contracts\Support\Arrayable;
 use Nexus\Auth\Clients\RvcHttpClient;
+use Nexus\Auth\Events\AuthenticatedFromClient;
 use Nexus\Auth\Support\AuthConfig;
 use Nexus\Enums\Auth\AuthType;
 
@@ -41,15 +42,40 @@ class RvcUserProvider implements UserProvider
         return $this->retrieveFromClient($credentials) ?? $this->retrieveFromEloquent($credentials);
     }
 
+    private function getSyncable(): array
+    {
+        $userClass = config('auth.providers.users_rvc.model');
+        $user = new $userClass;
+        if (method_exists($user,'syncable')) {
+            return $user->syncable();
+        }
+        return [];
+    }
+
     protected function retrieveFromClient(array $credentials): ?UserContract
     {
         $rawUser = $this->client->getAuthenticatableUser($credentials);
         $supportIdentifier = AuthConfig::getSupportIdentifier();
         $rawUser['auth'] = AuthType::RVC;
+        $syncable = $this->getSyncable();
 
-        return $this->newModelQuery()->updateOrCreate([
+        if (!empty($syncable)) {
+            $rawUser = array_filter(
+                $rawUser,
+                fn (string $key): bool => in_array($key, $syncable),
+                ARRAY_FILTER_USE_KEY
+            );
+        }
+
+        $user = $this->newModelQuery()->updateOrCreate([
             $supportIdentifier => $rawUser[$supportIdentifier],
         ], $rawUser);
+
+        if ($user) {
+            AuthenticatedFromClient::dispatch($rawUser, $user);
+        }
+
+        return $user;
     }
 
     protected function retrieveFromEloquent(array $credentials): ?UserContract

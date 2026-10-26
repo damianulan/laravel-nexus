@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Nexus\Auth\Providers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Nexus\Auth\Contracts\AuthStrategy;
