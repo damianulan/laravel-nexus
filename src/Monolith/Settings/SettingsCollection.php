@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nexus\Monolith\Settings;
 
-class SettingsCollection extends \Illuminate\Support\Collection
-{
+use Illuminate\Support\Collection;
 
+/** @extends Collection<class-string<SettingsGroup>, SettingsGroup> */
+class SettingsCollection extends Collection
+{
 }

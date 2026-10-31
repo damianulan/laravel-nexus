@@ -34,6 +34,9 @@ return [
     ],
 
     'settings' => [
-
+        'discovery_paths' => [
+            app_path(),
+            base_path('modules'),
+        ],
     ],
 ];

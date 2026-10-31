@@ -60,10 +60,6 @@ class NexusServiceProvider extends ServiceProvider
 
         $this->publishesMigrations($migrationPublishers, 'nexus-migrations');
 
-        // $this->publishes(array_merge([
-        //     __DIR__ . '/../config/nexus.php' => config_path('nexus.php'),
-        // ], $migrationPublishers), 'nexus');
-
         Route::macro('header', function (string $header): Route {
             Page::defineHeader($this->getName(), $header);
             return $this;
