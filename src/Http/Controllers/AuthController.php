@@ -6,11 +6,9 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
-use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -19,11 +17,9 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
 use Nexus\Enums\Auth\AuthType;
-use Nexus\Contracts\Auth\AuthService;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 use Illuminate\Contracts\Auth\Factory as AuthContract;
-use Illuminate\Support\Facades\Log;
 use Nexus\Auth\Contracts\AuthStrategy;
 
 abstract class AuthController extends BaseController
@@ -35,7 +31,7 @@ abstract class AuthController extends BaseController
         protected AuthStrategy $service
     ) {}
 
-    abstract public function loginForm(): mixed;
+    abstract public function loginForm(Request $request): mixed;
 
     abstract public function forgotPasswordForm(): mixed;
 

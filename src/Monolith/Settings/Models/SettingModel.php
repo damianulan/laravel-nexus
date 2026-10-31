@@ -6,6 +6,12 @@ namespace Nexus\Monolith\Settings\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel query()
+ * @mixin \Eloquent
+ */
 class SettingModel extends Model
 {
     protected $table = 'settings';

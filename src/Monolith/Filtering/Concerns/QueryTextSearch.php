@@ -3,6 +3,7 @@
 namespace Nexus\Monolith\Filtering\Concerns;
 
 use Illuminate\Contracts\Database\Query\Builder;
+use Str;
 
 trait QueryTextSearch
 {
@@ -19,27 +20,21 @@ trait QueryTextSearch
         bool $rightSearch = true
         ): void
     {
-        if ($fields === [] || empty($text)) {
+        if ($fields === [] || blank($text)) {
             return;
         }
 
-        $grammar = $query->getGrammar();
-        $wrappedFields = array_map(
-            fn (string $field): string => $grammar->wrap($field),
-            $fields,
-        );
-        $concatenatedFields = $query->getConnection()->getDriverName() === 'sqlite'
-            ? implode(" || ' ' || ", array_map(
-                fn (string $field): string => "coalesce({$field}, '')",
-                $wrappedFields,
-            ))
-            : "concat_ws(' ', " . implode(', ', $wrappedFields) . ')';
-        $terms = preg_split('/\s+/', trim($text), flags: PREG_SPLIT_NO_EMPTY);
-        $left = $leftSearch ? "%" : "";
-        $right = $rightSearch ? "%" : "";
+        $terms = preg_split('/\s+/u', Str::trim($text), flags: PREG_SPLIT_NO_EMPTY);
+
+        $left = $leftSearch ? '%' : '';
+        $right = $rightSearch ? '%' : '';
 
         foreach ($terms ?: [] as $term) {
-            $query->whereRaw("{$concatenatedFields} like ?", ["{$left}{$term}{$right}"]);
+            $query->where(function (Builder $query) use ($fields, $term, $left, $right) {
+                foreach ($fields as $field) {
+                    $query->orWhere($field, 'LIKE', "{$left}{$term}{$right}");
+                }
+            });
         }
     }
 
