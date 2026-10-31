@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Session;
 use Nexus\Contracts\Page\SnackbarContract;
 use Nexus\Enums\Page\FlashableType;
 
+/**
+ * @mixin \Nexus\Contracts\Page\FlashableAlert
+ */
 abstract class FlashableFacade extends Facade
 {
     public static function getType(): FlashableType
@@ -19,6 +22,17 @@ abstract class FlashableFacade extends Facade
 
     public static function getAll(): array
     {
-        return Session::pull(static::getType()->value, []);
+        $messages = Session::pull(static::getType()->value, []);
+        $class = \Nexus\Configs\AlertConfig::getActionClass();
+
+        if (static::getType() === $class) {
+            foreach (['success', 'error', 'warning', 'info'] as $alert) {
+                if (Session::has($alert)) {
+                    $messages[] = $class::text(Session::get($alert))->$alert()->toArray();
+                }
+            }
+        }
+
+        return $messages;
     }
 }

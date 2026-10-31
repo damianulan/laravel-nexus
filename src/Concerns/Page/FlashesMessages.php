@@ -2,7 +2,6 @@
 
 namespace Nexus\Concerns\Page;
 
-use Nexus\Facades\Page\Alert;
 use Nexus\Facades\Page\Snackbar;
 
 trait FlashesMessages
@@ -34,6 +33,7 @@ trait FlashesMessages
 
     protected function flash(string $message, string $type, ?string $icon = null): void
     {
-        Alert::text($message)->$type()->icon($icon)->flash();
+        $class = \Nexus\Configs\AlertConfig::getActionClass();
+        $class::text($message)->$type()->icon($icon)->flash();
     }
 }

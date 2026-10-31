@@ -104,6 +104,11 @@ class AlertBlueprint implements AlertContract, SnackbarContract
         return $this;
     }
 
+    public function getType(): FlashableType
+    {
+        return $this->type;
+    }
+
     public function toArray(): array
     {
         return [

@@ -33,6 +33,10 @@ return [
         'middleware' => App\Http\Middleware\HandleInertiaRequests::class
     ],
 
+    'alerts' => [
+        'action_alerts' => \Nexus\Facades\Page\Snackbar::class
+    ],
+
     'settings' => [
         'discovery_paths' => [
             app_path(),
