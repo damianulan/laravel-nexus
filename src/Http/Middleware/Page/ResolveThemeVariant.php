@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class ResolveThemeVariant
 {
-    public const string SESSION_KEY = 'theme_variant';
+    public const string COOKIE_KEY = 'theme_variant';
 
     private const string REQUEST_ATTRIBUTE = 'theme_variant';
 
@@ -22,10 +22,7 @@ final class ResolveThemeVariant
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $variant = $this->resolve($request);
-
-        $request->session()->put(self::SESSION_KEY, $variant->value);
-        $request->attributes->set(self::REQUEST_ATTRIBUTE, $variant);
+        $request->attributes->set(self::REQUEST_ATTRIBUTE, $this->resolve($request));
 
         return $next($request);
     }
@@ -39,14 +36,12 @@ final class ResolveThemeVariant
 
     private function resolve(Request $request): ThemeVariant
     {
-        $user = $request->user();
+        $cookieVariant = $request->cookie(self::COOKIE_KEY);
 
-        $sessionVariant = $request->session()->get(self::SESSION_KEY);
-
-        if (! is_string($sessionVariant)) {
+        if (! is_string($cookieVariant)) {
             return ThemeVariant::Light;
         }
 
-        return ThemeVariant::tryFrom($sessionVariant) ?? ThemeVariant::Light;
+        return ThemeVariant::tryFrom($cookieVariant) ?? ThemeVariant::Light;
     }
 }
