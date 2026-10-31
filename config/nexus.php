@@ -31,5 +31,9 @@ return [
 
     'inertia' => [
         'middleware' => App\Http\Middleware\HandleInertiaRequests::class
-    ]
+    ],
+
+    'settings' => [
+
+    ],
 ];
