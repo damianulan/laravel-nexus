@@ -1,53 +1,60 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nexus\Auth\Services;
 
 use Illuminate\Contracts\Auth\StatefulGuard;
-use Illuminate\Http\Request;
-use Nexus\Auth\Contracts\AuthStrategy;
-use Nexus\Auth\Support\AuthConfig;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Auth;
+use Nexus\Auth\Contracts\AuthStrategy;
+use Nexus\Auth\Support\AuthConfig;
 use RuntimeException;
 
-class AuthService implements AuthStrategy
+final class AuthService implements AuthStrategy
 {
-    protected array $rules = [];
-
-    public function __construct()
-    {
-        $this->rules = AuthConfig::getRules();
-    }
-
+    /** @param array<string, mixed> $attributes */
     public function validate(array $attributes): void
     {
-        Validator::make($attributes, $this->rules)->validate();
+        Validator::make($attributes, AuthConfig::getRules())->validate();
     }
 
+    /** @param array<string, mixed> $attributes */
     public function login(array $attributes, ?string $guard = null): bool
     {
-        if (Auth::check()) {
+        $guardName = $guard ?? AuthConfig::getGuard();
+        $credentials = Arr::only($attributes, AuthConfig::getLoginAttributes());
+        $statefulGuard = Auth::guard($guardName);
+
+        if (! $statefulGuard instanceof StatefulGuard) {
+            throw new RuntimeException('The configured authentication guard must be stateful.');
+        }
+
+        if ($statefulGuard->check()) {
             return true;
         }
 
-        if ($guard === null) {
-            $guard = AuthConfig::getGuard();
-        }
-        $this->validate(
-            collect($attributes)->only(AuthConfig::getLoginAttributes())->all()
-        );
+        $this->validate($credentials);
 
-        $remember = (bool) ($attributes['remember'] ?? false);
-        unset($attributes['remember']);
+        $remember = AuthConfig::usesRememberMe() && (bool) ($credentials['remember'] ?? false);
+        unset($credentials['remember']);
 
-        if (! Auth::guard($guard)->attempt($attributes, $remember)) {
-            return false;
+        try {
+            if (! $statefulGuard->attempt($credentials, $remember)) {
+                $this->rejectAuthentication();
+            }
+        } catch (RequestException $exception) {
+            if (in_array($exception->response->status(), [401, 403, 422], true)) {
+                $this->rejectAuthentication();
+            }
+
+            throw $exception;
         }
 
-        if (Auth::guard($guard) instanceof StatefulGuard) {
-            session()->regenerate();
-        }
+        session()->regenerate();
 
         return true;
     }
@@ -64,5 +71,12 @@ class AuthService implements AuthStrategy
 
         session()->invalidate();
         session()->regenerateToken();
+    }
+
+    private function rejectAuthentication(): never
+    {
+        throw ValidationException::withMessages([
+            AuthConfig::secretAttribute() => [AuthConfig::invalidCredentialsMessage()],
+        ]);
     }
 }

@@ -29,6 +29,14 @@ class AuthConfig
         return (bool) config('nexus.auth.remember_me', true);
     }
 
+    public static function invalidCredentialsMessage(): string
+    {
+        $key = config('nexus.auth.invalid_credentials_message', 'auth.failed');
+        $message = __(is_string($key) ? $key : 'auth.failed');
+
+        return is_string($message) ? $message : 'The provided credentials do not match our records.';
+    }
+
     public static function getGuard(): string
     {
         return config('auth.defaults.guard', 'web');

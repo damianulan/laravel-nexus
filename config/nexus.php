@@ -4,7 +4,7 @@ return [
     'auth' => [
         'strategy' => Nexus\Auth\Services\AuthService::class,
 
-        'controller' => App\Http\Controllers\AuthController::class,
+        'controller' => null,
 
         'rvc' => [
             'url' => env('AUTH_API_URL'),
@@ -14,6 +14,7 @@ return [
 
         'support_identifier' => env('AUTH_SUPPORT_IDENTIFIER', 'email'),
         'secret_attribute' => env('AUTH_SECRET_ATTRIBUTE', 'password'),
+        'invalid_credentials_message' => 'auth.failed',
         'remember_me' => true,
         'login_attributes' => [
             'email',
@@ -30,7 +31,7 @@ return [
     ],
 
     'inertia' => [
-        'middleware' => App\Http\Middleware\HandleInertiaRequests::class
+        'middleware' => Nexus\Http\Middleware\Inertia\InertiaMiddleware::class,
     ],
 
     'alerts' => [

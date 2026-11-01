@@ -1,21 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nexus\Auth\Providers;
 
-use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
-use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Nexus\Auth\Clients\RvcHttpClient;
 use Nexus\Auth\Events\AuthenticatedFromClient;
 use Nexus\Auth\Support\AuthConfig;
 use Nexus\Enums\Auth\AuthType;
+use RuntimeException;
 
 class RvcUserProvider implements UserProvider
 {
+    private mixed $retrievedUserIdentifier = null;
+
     public function __construct(
         protected string $model,
         protected RvcHttpClient $client
-    ) {}
+    ) {
+    }
 
     /**
      * The callback that may modify the user retrieval queries.
@@ -36,77 +45,63 @@ class RvcUserProvider implements UserProvider
     public function retrieveByCredentials(#[\SensitiveParameter] array $credentials)
     {
         if (empty($credentials)) {
-            return;
+            return null;
         }
 
-        return $this->retrieveFromClient($credentials) ?? $this->retrieveFromEloquent($credentials);
-    }
+        $user = $this->retrieveFromClient($credentials);
+        $this->retrievedUserIdentifier = $user?->getAuthIdentifier();
 
-    private function getSyncable(): array
-    {
-        $userClass = config('auth.providers.users_rvc.model');
-        $user = new $userClass;
-        if (method_exists($user,'syncable')) {
-            return $user->syncable();
-        }
-        return [];
+        return $user;
     }
 
     protected function retrieveFromClient(array $credentials): ?UserContract
     {
         $rawUser = $this->client->getAuthenticatableUser($credentials);
         $supportIdentifier = AuthConfig::getSupportIdentifier();
+
+        if (! is_string($supportIdentifier) || $supportIdentifier === '') {
+            throw new RuntimeException('The authentication support identifier must be a non-empty string.');
+        }
+
+        $identifier = $rawUser[$supportIdentifier] ?? null;
+
+        if (! is_int($identifier) && ! is_string($identifier)) {
+            throw new RuntimeException("The authentication response must contain [{$supportIdentifier}].");
+        }
+
+        $model = $this->createModel();
+        $matchingUsers = $this->newSynchronizationQuery($model)
+            ->where($supportIdentifier, $identifier)
+            ->limit(2)
+            ->get();
+
+        if ($matchingUsers->count() > 1) {
+            throw new AuthenticationException('Multiple local users match the external identity.');
+        }
+
+        $user = $matchingUsers->first() ?? $model;
+
+        if (! $user instanceof UserContract || ! $this->isAuthorizable($user)) {
+            return null;
+        }
+
         $rawUser['auth'] = AuthType::RVC;
-        $syncable = $this->getSyncable();
+        $syncableAttributes = $this->syncableAttributes($user, $rawUser);
+        $user->fill($syncableAttributes)->save();
 
-        if (!empty($syncable)) {
-            $rawUser = array_filter(
-                $rawUser,
-                fn (string $key): bool => in_array($key, $syncable),
-                ARRAY_FILTER_USE_KEY
-            );
+        if (! $this->isAuthorizable($user)) {
+            return null;
         }
 
-        $user = $this->newModelQuery()->updateOrCreate([
-            $supportIdentifier => $rawUser[$supportIdentifier],
-        ], $rawUser);
-
-        if ($user) {
-            AuthenticatedFromClient::dispatch($rawUser, $user);
-        }
+        AuthenticatedFromClient::dispatch($syncableAttributes, $user);
 
         return $user;
     }
 
-    protected function retrieveFromEloquent(array $credentials): ?UserContract
+    public function validateCredentials(UserContract $user, #[\SensitiveParameter] array $credentials): bool
     {
-        $query = $this->newModelQuery();
-
-        foreach ($credentials as $key => $value) {
-            if (is_array($value) || $value instanceof Arrayable) {
-                $query->whereIn($key, $value);
-            } elseif ($value instanceof Closure) {
-                $value($query);
-            } else {
-                $query->where($key, $value);
-            }
-        }
-
-        $user = $query->first();
-
-        if ($user) {
-            $user->setAttribute('auth', AuthType::LOCAL);
-            $user->updateQuietly();
-        }
-
-        return $user;
-    }
-
-    public function validateCredentials(UserContract $user, #[\SensitiveParameter] array $credentials)
-    {
-        $authenticated = $this->retrieveFromClient($credentials) ?? $this->retrieveFromEloquent($credentials);
-
-        return $authenticated->getAuthIdentifier() === $user->getAuthIdentifier();
+        return $this->retrievedUserIdentifier !== null
+            && $this->retrievedUserIdentifier === $user->getAuthIdentifier();
     }
 
     /**
@@ -117,7 +112,7 @@ class RvcUserProvider implements UserProvider
      * @param  TModel|null  $model
      * @return \Illuminate\Database\Eloquent\Builder<TModel>
      */
-    protected function newModelQuery($model = null)
+    protected function newModelQuery($model = null): Builder
     {
         $query = is_null($model)
             ? $this->createModel()->newQuery()
@@ -125,7 +120,7 @@ class RvcUserProvider implements UserProvider
 
         with($query, $this->queryCallback);
 
-        if(method_exists($query, 'authorizable')) {
+        if (method_exists($query, 'authorizable')) {
             $query->authorizable();
         }
 
@@ -144,7 +139,7 @@ class RvcUserProvider implements UserProvider
      */
     public function createModel()
     {
-        $class = '\\'.ltrim($this->model, '\\');
+        $class = '\\' . ltrim($this->model, '\\');
 
         return new $class;
     }
@@ -213,7 +208,8 @@ class RvcUserProvider implements UserProvider
         $model = $this->createModel();
 
         $retrievedModel = $this->newModelQuery($model)->where(
-            $model->getAuthIdentifierName(), $identifier
+            $model->getAuthIdentifierName(),
+            $identifier
         )->first();
 
         if (! $retrievedModel) {
@@ -223,5 +219,46 @@ class RvcUserProvider implements UserProvider
         $rememberToken = $retrievedModel->getRememberToken();
 
         return $rememberToken && hash_equals($rememberToken, $token) ? $retrievedModel : null;
+    }
+
+    /** @return Builder<Model> */
+    private function newSynchronizationQuery(Model $model): Builder
+    {
+        $query = $model->newQuery();
+
+        if (method_exists($model, 'trashed')) {
+            $query->withTrashed();
+        }
+
+        return $query;
+    }
+
+    /**
+     * @param UserContract&Model $user
+     * @param array<string, mixed> $rawUser
+     * @return array<string, mixed>
+     */
+    private function syncableAttributes(UserContract $user, array $rawUser): array
+    {
+        if (! method_exists($user, 'syncable')) {
+            return $rawUser;
+        }
+
+        $syncable = $user->syncable();
+
+        return is_array($syncable) && $syncable !== []
+            ? Arr::only($rawUser, $syncable)
+            : $rawUser;
+    }
+
+    private function isAuthorizable(UserContract $user): bool
+    {
+        if (! $user instanceof Model || ! $user->exists) {
+            return true;
+        }
+
+        return $this->newModelQuery()
+            ->whereKey($user->getKey())
+            ->exists();
     }
 }

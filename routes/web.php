@@ -1,29 +1,32 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Nexus\Http\Controllers\AuthController;
 
-Route::middleware('web')->group(function (): void {
-    Route::middleware('guest')->group(function (): void {
-        Route::get('/login', [config('nexus.auth.controller'), 'loginForm'])->name('login');
-        Route::post('/login', [config('nexus.auth.controller'), 'login'])->middleware('throttle:6,1')->name('login.store');
+$authController = config('nexus.auth.controller');
 
-        Route::get('/register', [config('nexus.auth.controller'), 'registerForm'])->name('register');
-        Route::post('/register', [config('nexus.auth.controller'), 'register'])->middleware('throttle:6,1')->name('register.store');
+if (is_string($authController) && class_exists($authController)) {
+    Route::middleware('web')->group(function () use ($authController): void {
+        Route::middleware('guest')->group(function () use ($authController): void {
+            Route::get('/login', [$authController, 'loginForm'])->name('login');
+            Route::post('/login', [$authController, 'login'])->middleware('throttle:6,1')->name('login.store');
 
-        Route::get('/forgot-password', [config('nexus.auth.controller'), 'forgotPasswordForm'])->name('password.request');
-        Route::post('/forgot-password', [config('nexus.auth.controller'), 'sendResetLink'])->middleware('throttle:6,1')->name('password.email');
+            Route::get('/register', [$authController, 'registerForm'])->name('register');
+            Route::post('/register', [$authController, 'register'])->middleware('throttle:6,1')->name('register.store');
 
-        Route::get('/reset-password/{token}', [config('nexus.auth.controller'), 'resetPasswordForm'])->name('password.reset');
-        Route::post('/reset-password', [config('nexus.auth.controller'), 'resetPassword'])->middleware('throttle:6,1')->name('password.store');
+            Route::get('/forgot-password', [$authController, 'forgotPasswordForm'])->name('password.request');
+            Route::post('/forgot-password', [$authController, 'sendResetLink'])->middleware('throttle:6,1')->name('password.email');
+
+            Route::get('/reset-password/{token}', [$authController, 'resetPasswordForm'])->name('password.reset');
+            Route::post('/reset-password', [$authController, 'resetPassword'])->middleware('throttle:6,1')->name('password.store');
+        });
+
+        Route::middleware('nexus.auth')->group(function () use ($authController): void {
+            Route::post('/logout', [$authController, 'logout'])->name('logout');
+
+            Route::get('/confirm-password', [$authController, 'confirmPasswordForm'])->name('password.confirm');
+            Route::post('/confirm-password', [$authController, 'confirmPassword'])->middleware('throttle:6,1')->name('password.confirm.store');
+
+            Route::put('/password', [$authController, 'updatePassword'])->name('password.update');
+        });
     });
-
-    Route::middleware('nexus.auth')->group(function (): void {
-        Route::post('/logout', [config('nexus.auth.controller'), 'logout'])->name('logout');
-
-        Route::get('/confirm-password', [config('nexus.auth.controller'), 'confirmPasswordForm'])->name('password.confirm');
-        Route::post('/confirm-password', [config('nexus.auth.controller'), 'confirmPassword'])->middleware('throttle:6,1')->name('password.confirm.store');
-
-        Route::put('/password', [config('nexus.auth.controller'), 'updatePassword'])->name('password.update');
-    });
-});
+}
