@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Nexus\Monolith\Settings\Models\SettingModel;
 use ReflectionClass;
 use Spatie\StructureDiscoverer\Discover;
+use Nexus\Monolith\Settings\SettingsGroup;
 
 class Factory
 {
@@ -57,7 +58,11 @@ class Factory
         $groups = [];
 
         foreach ($groupClasses as $groupClass) {
-            $groups[$groupClass] = new $groupClass($settings->get($groupClass, []));
+            /**
+             * @var SettingsGroup $group
+             */
+            $group = new $groupClass($settings->get($groupClass, []));
+            $groups[$group->groupKey()] = $group;
         }
 
         return new SettingsCollection($groups);

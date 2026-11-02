@@ -7,8 +7,9 @@ namespace Nexus\Monolith\Settings;
 use Nexus\Monolith\Settings\Models\SettingModel;
 use ReflectionClass;
 use ReflectionProperty;
+use Str;
 
-abstract class SettingsGroup
+abstract class SettingsGroup implements \Illuminate\Contracts\Support\Arrayable
 {
     /** @param iterable<int, SettingModel> $settings */
     public function __construct(iterable $settings = [])
@@ -66,5 +67,21 @@ abstract class SettingsGroup
         }
 
         return $reflectedProperties;
+    }
+
+    public function moduleSlug(): string
+    {
+        return '';
+    }
+
+    public function groupKey(): string
+    {
+        $module = !empty($this->moduleSlug()) ? $this->moduleSlug() . '.' :'';
+        return $module . Str::lower(Str::snake(Str::afterLast('Setting', class_basename(static::class))));
+    }
+
+    public function toArray(): array
+    {
+        return $this->getAttributes();
     }
 }
