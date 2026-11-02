@@ -77,7 +77,7 @@ abstract class SettingsGroup implements \Illuminate\Contracts\Support\Arrayable
     public function groupKey(): string
     {
         $module = !empty($this->moduleSlug()) ? $this->moduleSlug() . '.' :'';
-        return $module . Str::lower(Str::snake(Str::afterLast('Setting', class_basename(static::class))));
+        return $module . Str::lower(Str::snake(Str::beforeLast(class_basename(static::class), 'Setting')));
     }
 
     public function toArray(): array

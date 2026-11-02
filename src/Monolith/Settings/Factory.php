@@ -9,7 +9,6 @@ use Illuminate\Support\Collection;
 use Nexus\Monolith\Settings\Models\SettingModel;
 use ReflectionClass;
 use Spatie\StructureDiscoverer\Discover;
-use Nexus\Monolith\Settings\SettingsGroup;
 
 class Factory
 {
@@ -31,14 +30,22 @@ class Factory
 
     public function get(): SettingsCollection
     {
-        /** @var SettingsCollection $settings */
-        $settings = $this->cache->remember(
+        $cachedGroups = $this->cache->get(self::CACHE_KEY);
+
+        if (! is_array($cachedGroups)) {
+            $this->cache->forget(self::CACHE_KEY);
+        }
+
+        /** @var array<string, array{class: class-string<SettingsGroup>, attributes: array<string, mixed>}> $groups */
+        $groups = $this->cache->remember(
             self::CACHE_KEY,
             self::CACHE_TTL_SECONDS,
-            fn (): SettingsCollection => $this->load(),
+            fn (): array => $this->cacheableGroups(),
         );
 
-        return $settings;
+        return new SettingsCollection(
+            collect($groups)->map(fn (array $group): SettingsGroup => $this->hydrateGroup($group)),
+        );
     }
 
     public function forget(): bool
@@ -66,6 +73,31 @@ class Factory
         }
 
         return new SettingsCollection($groups);
+    }
+
+    /** @return array<string, array{class: class-string<SettingsGroup>, attributes: array<string, mixed>}> */
+    private function cacheableGroups(): array
+    {
+        return $this->load()
+            ->map(fn (SettingsGroup $group): array => [
+                'class' => $group::class,
+                'attributes' => $group->getAttributes(),
+            ])
+            ->all();
+    }
+
+    /** @param array{class: class-string<SettingsGroup>, attributes: array<string, mixed>} $group */
+    private function hydrateGroup(array $group): SettingsGroup
+    {
+        $settings = collect($group['attributes'])->map(
+            fn (mixed $payload, string $name): SettingModel => new SettingModel([
+                'group' => $group['class'],
+                'name' => $name,
+                'payload' => $payload,
+            ]),
+        );
+
+        return new $group['class']($settings);
     }
 
     /** @return array<int, class-string<SettingsGroup>> */
