@@ -12,7 +12,6 @@ use Nexus\Monolith\Settings\Factory;
  * @property int $id
  * @property string $name
  * @property array<array-key, mixed> $payload
- * @property string|null $module
  * @property string|null $group
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -22,7 +21,6 @@ use Nexus\Monolith\Settings\Factory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel whereGroup($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel whereModule($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel wherePayload($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SettingModel whereUpdatedAt($value)
