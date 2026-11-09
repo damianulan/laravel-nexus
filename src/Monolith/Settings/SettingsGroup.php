@@ -31,6 +31,8 @@ abstract class SettingsGroup implements \Illuminate\Contracts\Support\Arrayable
         }
     }
 
+    abstract public function getGroupName(): ?string;
+
     public function defaults(): array
     {
         return [
