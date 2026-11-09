@@ -44,6 +44,10 @@ abstract class SettingsGroup implements \Illuminate\Contracts\Support\Arrayable
         $attributes = [];
 
         foreach ($this->reflectionProperties() as $property) {
+            if (!$property->isInitialized($this)) {
+                $attributes[$property->getName()] = null;
+                continue;
+            }
             $attributes[$property->getName()] = $property->getValue($this);
         }
 

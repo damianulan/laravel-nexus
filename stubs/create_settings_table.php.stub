@@ -12,8 +12,7 @@ return new class () extends Migration {
         Schema::create('settings', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
-            $table->json('payload');
-            $table->string('module')->nullable();
+            $table->json('payload')->nullable();
             $table->string('group')->nullable();
             $table->timestamps();
         });

@@ -12,9 +12,8 @@ return new class () extends Migration {
         Schema::create('preferences', function (Blueprint $table): void {
             $table->id();
             $table->morphs('model');
-            $table->string('attribute');
+            $table->string('name');
             $table->json('payload');
-            $table->string('module')->nullable();
             $table->string('group')->nullable();
             $table->timestamps();
         });

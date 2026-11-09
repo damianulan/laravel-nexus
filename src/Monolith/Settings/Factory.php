@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Nexus\Monolith\Settings\Models\SettingModel;
 use ReflectionClass;
 use Spatie\StructureDiscoverer\Discover;
+use Str;
 
 class Factory
 {
@@ -90,11 +91,10 @@ class Factory
     private function hydrateGroup(array $group): SettingsGroup
     {
         $settings = collect($group['attributes'])->map(
-            fn (mixed $payload, string $name): SettingModel => new SettingModel([
+            fn (mixed $payload, string $name): SettingModel => SettingModel::firstOrCreate([
                 'group' => $group['class'],
                 'name' => $name,
-                'payload' => $payload,
-            ]),
+            ], ['payload' => $payload]),
         );
 
         return new $group['class']($settings);
@@ -129,5 +129,14 @@ class Factory
         return SettingModel::query()
             ->whereIn('group', $groupClasses)
             ->get();
+    }
+
+    public function find(string $key): mixed
+    {
+        $property = Str::afterLast($key, '.');
+        $group = Str::beforeLast($key, '.');
+        $settingsAttributes = $this->get()->get($group)?->getAttributes() ?? [];
+
+        return $settingsAttributes[$property] ?? null;
     }
 }
