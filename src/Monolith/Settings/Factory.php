@@ -45,7 +45,9 @@ class Factory
         );
 
         return new SettingsCollection(
-            collect($groups)->map(fn (array $group): SettingsGroup => $this->hydrateGroup($group)),
+            collect($groups)
+                ->map(fn (array $group): SettingsGroup => $this->hydrateGroup($group))
+                ->sortBy(fn (SettingsGroup $group): int => $group->order()),
         );
     }
 

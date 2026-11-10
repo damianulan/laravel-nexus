@@ -11,7 +11,7 @@ use Nexus\Monolith\Settings\Factory;
 /**
  * @property int $id
  * @property string $name
- * @property array<array-key, mixed> $payload
+ * @property array<array-key, mixed>|null $payload
  * @property string|null $group
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at

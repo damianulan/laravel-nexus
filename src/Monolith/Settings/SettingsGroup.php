@@ -40,6 +40,11 @@ abstract class SettingsGroup implements \Illuminate\Contracts\Support\Arrayable
         ];
     }
 
+    public function order(): int
+    {
+        return 0;
+    }
+
     /** @return array<string, mixed> */
     public function getAttributes(): array
     {
